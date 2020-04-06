@@ -1,7 +1,18 @@
 import semmle.code.java.dataflow.FlowSources
+import semmle.code.java.security.ExternalProcess
+import DataFlow::PathGraph
 /*
 寻找Runtime.getRuntime.exec()
 */
+class RuntimeExecMethod extends Method{
+RuntimeExecMethod(){
+  this.getDeclaringType().getQualifiedName()="java.lang.Runtime" and
+  (
+    //this.getName()="getRuntime" or 
+    this.getName()="exec"
+  )
+}
+}
 
 class RuntimeCommandTaint extends TaintTracking::Configuration{
 RuntimeCommandTaint(){
@@ -9,20 +20,16 @@ RuntimeCommandTaint(){
 }
 
 override predicate isSource(DataFlow::Node source){
-source instanceof RemoteFlowSource //and
-//(
-    //exists(Method m|m.getName()="exec")
-//)
+source instanceof RemoteFlowSource
 }
 
 override predicate isSink(DataFlow::Node sink){
 //todo
-exists(MethodAccess ma|ma.getMethod().getName()="exec" and ma.getArgument(0)=sink.asExpr())
+sink.asExpr() instanceof ArgumentToExec
 }
 
 }
 
-
-from RuntimeCommandTaint commandConfig,DataFlow::Node source,DataFlow::Node sink
-where commandConfig.hasFlow(source,sink)
+from RuntimeCommandTaint commandConfig,DataFlow::PathNode source,DataFlow::PathNode sink,StringArgumentToExec execArg
+where commandConfig.hasFlowPath(source,sink) and sink.getNode() = DataFlow::exprNode(execArg)
 select "untrusted input:",source,"command execute:",sink
