@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "/Users/tao/Downloads/codeql-case/codeql"
+		},
+		{
+			"name": "[java-sec source archive]",
+			"uri": "codeql-zip-archive://0-49/Users/tao/Downloads/codeql-case/java-sec/src.zip/"
+		}
+	],
+	"settings": {}
+}
